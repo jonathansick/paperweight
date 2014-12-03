@@ -9,6 +9,7 @@ Object Oriented Abstraction of a latex document
 import codecs
 
 from .gitio import read_git_blob
+from . import texutils
 
 
 class TexDocument(object):
@@ -27,6 +28,10 @@ class TexDocument(object):
     def __init__(self, text):
         super(TexDocument, self).__init__()
         self.text = text
+
+    def remove_comments(self):
+        """Remove latex comments from document (modifies document in place)."""
+        self.text = texutils.remove_comments(self.text)
 
 
 class FilesystemTexDocument(TexDocument):
