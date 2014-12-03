@@ -3,7 +3,7 @@
 
 import os
 import re
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def rel_path(path):
@@ -32,7 +32,7 @@ setup(
     license='BSD',
     description='Tools for hacking LaTeX documents',
     long_description=long_description,
-    py_modules=['paperweight'],
+    packages=find_packages(),
     install_requires=['GitPython', 'pytest'],
     url='https://github.com/jonathansick/paperweight',
     download_url='',
