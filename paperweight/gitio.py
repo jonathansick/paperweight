@@ -12,7 +12,22 @@ import os
 
 
 def read_git_blob(commit_ref, path):
-    """Get text from a git blob."""
+    """Get text from a git blob.
+
+    Parameters
+    ----------
+    commit_ref : str
+        Any SHA or git tag that can resolve into a commit in the
+        git repository.
+    path : str
+        Path to the document in the git repository, relative to the root
+        of the repository.
+
+    Returns
+    -------
+    text : unicode
+        The document text.
+    """
     repo = git.Repo('.')
     tree = repo.tree(commit_ref)
     dirname, fname = os.path.split(path)
