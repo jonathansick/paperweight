@@ -53,6 +53,16 @@ class TexDocument(object):
             paths.append(full_fname)
         return paths
 
+    @property
+    def bib_name(self):
+        """Find and return the name of the bibtex bibliography file."""
+        bib_name = None
+        for match in texutils.bib_pattern.finditer(self.text):
+            bib_name = match.group(1)
+            if not bib_name.endswith('.bib'):
+                bib_name = ".".join((bib_name, "bib"))
+        return bib_name
+
     def remove_comments(self, recursive=True):
         """Remove latex comments from document (modifies document in place)."""
         self.text = texutils.remove_comments(self.text)
