@@ -6,6 +6,7 @@ Object Oriented Abstraction of a latex document
 2014-12-02 - Created by Jonathan Sick
 """
 
+import os
 from collections import OrderedDict
 from itertools import chain
 import codecs
@@ -63,6 +64,20 @@ class TexDocument(object):
                 bib_name = ".".join((bib_name, "bib"))
         return bib_name
 
+    @property
+    def bib_path(self):
+        """Return the full file path to the .bib bibliography document."""
+        bib_name = self.bib_name
+        # FIXME need to bake in search paths for tex documents in all platforms
+        osx_path = os.path.expanduser(
+            "~/Library/texmf/bibtex/bib/{0}".format(bib_name))
+        if self._file_exists(bib_name):
+            return bib_name  # bib is in project directory
+        elif os.path.exists(osx_path):
+            return osx_path
+        else:
+            return None
+
     def remove_comments(self, recursive=True):
         """Remove latex comments from document (modifies document in place)."""
         self.text = texutils.remove_comments(self.text)
@@ -95,6 +110,9 @@ class FilesystemTexDocument(TexDocument):
                 self._children[path] = FilesystemTexDocument(path,
                                                              recursive=True)
 
+    def _file_exists(self, path):
+        return os.path.exists(path)
+
 
 class GitTexDocument(TexDocument):
     """A tex document derived from a file in the git repository.
@@ -126,3 +144,6 @@ class GitTexDocument(TexDocument):
                 # FIXME may need to deal with path normalization here.
                 self._children[path] = FilesystemTexDocument(path,
                                                              recursive=True)
+
+    def _file_exists(self, path):
+        return False  # TODO need to implement file existence test in git
