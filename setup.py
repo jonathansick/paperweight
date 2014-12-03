@@ -26,11 +26,20 @@ except IOError:
 
 setup(
     name='paperweight',
-    version='0.0',
+    version=get_version(),
     author='Jonathan Sick',
     author_email='jonathansick@mac.com',
     license='BSD',
     description='Tools for hacking LaTeX documents',
     long_description=long_description,
-    py_modules=['paperweight']
+    py_modules=['paperweight'],
+    install_requires=['GitPython', 'pytest'],
+    url='https://github.com/jonathansick/paperweight',
+    download_url='',
+
+    classifiers=['Development Status :: 3 - Alpha',
+                 'Programming Language :: Python',
+                 'Programming Language :: Python :: 2',
+                 'Programming Language :: Python :: 2.7',
+                 'Environment :: Console'],
 )
