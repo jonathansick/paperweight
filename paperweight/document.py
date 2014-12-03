@@ -50,10 +50,22 @@ class GitTexDocument(TexDocument):
 
     .. note:: Should I include the path to the git root? (in case the user's
               CWD is not that of the git document)
+
+    Parameters
+    ----------
+    git_path : str
+        Path to the document in the git repository, relative to the root
+        of the repository.
+    git_hash : str
+        Any SHA or git tag that can resolve into a commit in the
+        git repository.
+    root : str
+        Path from current working directory to the root of the git repository.
     """
-    def __init__(self, git_path, git_hash):
+    def __init__(self, git_path, git_hash, root='.'):
         # read teh tex document
         self._git_path = git_path
+        self._git_root = root
         self._git_hash = git_hash
-        text = read_git_blob(git_hash, git_path)
+        text = read_git_blob(git_hash, git_path, root=root)
         super(GitTexDocument, self).__init__(text)

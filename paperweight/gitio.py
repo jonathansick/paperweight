@@ -11,7 +11,7 @@ import git
 import os
 
 
-def read_git_blob(commit_ref, path):
+def read_git_blob(commit_ref, path, root='.'):
     """Get text from a git blob.
 
     Parameters
@@ -22,13 +22,15 @@ def read_git_blob(commit_ref, path):
     path : str
         Path to the document in the git repository, relative to the root
         of the repository.
+    root : str
+        Path from current working directory to the root of the git repository.
 
     Returns
     -------
     text : unicode
         The document text.
     """
-    repo = git.Repo('.')
+    repo = git.Repo(root)
     tree = repo.tree(commit_ref)
     dirname, fname = os.path.split(path)
     text = None
