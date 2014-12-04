@@ -138,6 +138,12 @@ class FilesystemTexDocument(TexDocument):
             bbl_text = f.read()
         self.text = texutils.inline_bbl(self.text, bbl_text)
 
+    def inline_inputs(self):
+        """Inline all input latex files references by this document. The
+        inlining is accomplished recursively.
+        """
+        self.text = texutils.inline(self.text)
+
 
 class GitTexDocument(TexDocument):
     """A tex document derived from a file in the git repository.
