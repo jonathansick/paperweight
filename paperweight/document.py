@@ -85,6 +85,20 @@ class TexDocument(object):
             for path, document in self._children.iteritems():
                 document.remove_comments(recursive=True)
 
+    @property
+    def bib_keys(self):
+        """List of all bib keys in the document (and inputted documents)."""
+        bib_keys = []
+        # Get bib keys in this document
+        for match in texutils.cite_pattern.finditer(self.text):
+            keys = match.group(1).split(',')
+            bib_keys += keys
+        # Recursion
+        for path, document in self._children.iteritems():
+            bib_keys += document.bib_keys
+        bib_keys = list(set(bib_keys))
+        return bib_keys
+
 
 class FilesystemTexDocument(TexDocument):
     """A tex document derived from a file in the filesystem.

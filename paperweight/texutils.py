@@ -24,8 +24,10 @@ import codecs
 from .gitio import read_git_blob
 
 
-bib_pattern = re.compile(ur'\\bibliography{(.*)}', re.UNICODE)
-input_pattern = re.compile(ur'\\input{(.*)}', re.UNICODE)
+# ? is non-greedy
+cite_pattern = re.compile(ur'\\cite*{(.*?)}', re.UNICODE)
+bib_pattern = re.compile(ur'\\bibliography{(.*?)}', re.UNICODE)
+input_pattern = re.compile(ur'\\input{(.*?)}', re.UNICODE)
 input_ifexists_pattern = re.compile(
     ur'\\InputIfFileExists{(.*)}{(.*)}{(.*)}',
     re.UNICODE)
