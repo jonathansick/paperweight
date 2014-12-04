@@ -99,6 +99,11 @@ class TexDocument(object):
         bib_keys = list(set(bib_keys))
         return bib_keys
 
+    def write(self, path):
+        """Write the document's text to a ``path`` on the filesystem."""
+        with codecs.open(path, 'w', encoding='utf-8') as f:
+            f.write(self.text)
+
 
 class FilesystemTexDocument(TexDocument):
     """A tex document derived from a file in the filesystem.
