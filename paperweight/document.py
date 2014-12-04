@@ -127,6 +127,17 @@ class FilesystemTexDocument(TexDocument):
     def _file_exists(self, path):
         return os.path.exists(path)
 
+    def inline_bbl(self):
+        """Inline a compiled bibliography (.bbl) in place of a bibliography
+        environment. The document is modified in place.
+        """
+        bbl_path = os.path.splitext(self._filepath)[0] + ".bbl"
+        if not os.path.exists(bbl_path):
+            return
+        with codecs.open(bbl_path, 'r', encoding='utf-8') as f:
+            bbl_text = f.read()
+        self.text = texutils.inline_bbl(self.text, bbl_text)
+
 
 class GitTexDocument(TexDocument):
     """A tex document derived from a file in the git repository.
