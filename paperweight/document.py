@@ -119,6 +119,7 @@ class FilesystemTexDocument(TexDocument):
     def __init__(self, path, recursive=True):
         # read the tex document
         self._filepath = path
+        root = os.path.dirname(os.path.abspath(path))
         with codecs.open(path, 'r', encoding='utf-8') as f:
             text = f.read()
         super(FilesystemTexDocument, self).__init__(text)
@@ -126,7 +127,7 @@ class FilesystemTexDocument(TexDocument):
             child_paths = self.find_input_documents()
             for path in child_paths:
                 # FIXME may need to deal with path normalization here.
-                self._children[path] = FilesystemTexDocument(path,
+                self._children[path] = FilesystemTexDocument(root+os.sep+path,
                                                              recursive=True)
 
     def _file_exists(self, path):
