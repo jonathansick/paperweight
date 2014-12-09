@@ -91,8 +91,7 @@ class TexDocument(object):
         bib_keys = []
         # Get bib keys in this document
         for match in texutils.cite_pattern.finditer(self.text):
-            citebody = match.groups()
-            keys = (citebody[-1].replace(" ","")).split(',')
+            keys = match.group(1).split(',')
             bib_keys += keys
         # Recursion
         for path, document in self._children.iteritems():
@@ -104,6 +103,35 @@ class TexDocument(object):
         """Write the document's text to a ``path`` on the filesystem."""
         with codecs.open(path, 'w', encoding='utf-8') as f:
             f.write(self.text)
+
+    @property
+    def bibitems(self):
+        """List of bibitem strings appearing in the document."""
+        bibitems = []
+        lines = self.text.split('\n')
+        for i, line in enumerate(lines):
+            if line.lstrip().startswith(u'\\bibitem'):
+                # accept this line
+                # check if next line is also part of bibitem
+                # FIXME ugh, re-write
+                j = 1
+                while True:
+                    try:
+                        if (lines[i + j].startswith(u'\\bibitem') is False) \
+                                and (lines[i + j] != '\n'):
+                            line += lines[i + j]
+                        elif "\end{document}" in lines[i + j]:
+                            break
+                        else:
+                            break
+                    except IndexError:
+                        break
+                    else:
+                        print line
+                        j += 1
+                print "finished", line
+                bibitems.append(line)
+        return bibitems
 
 
 class FilesystemTexDocument(TexDocument):
@@ -120,7 +148,6 @@ class FilesystemTexDocument(TexDocument):
     def __init__(self, path, recursive=True):
         # read the tex document
         self._filepath = path
-        root = os.path.dirname(os.path.abspath(path))
         with codecs.open(path, 'r', encoding='utf-8') as f:
             text = f.read()
         super(FilesystemTexDocument, self).__init__(text)
@@ -128,7 +155,7 @@ class FilesystemTexDocument(TexDocument):
             child_paths = self.find_input_documents()
             for path in child_paths:
                 # FIXME may need to deal with path normalization here.
-                self._children[path] = FilesystemTexDocument(root+os.sep+path,
+                self._children[path] = FilesystemTexDocument(path,
                                                              recursive=True)
 
     def _file_exists(self, path):
