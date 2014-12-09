@@ -91,7 +91,8 @@ class TexDocument(object):
         bib_keys = []
         # Get bib keys in this document
         for match in texutils.cite_pattern.finditer(self.text):
-            keys = match.group(1).split(',')
+            citebody = match.groups()
+            keys = (citebody[-1].replace(" ","")).split(',')
             bib_keys += keys
         # Recursion
         for path, document in self._children.iteritems():
