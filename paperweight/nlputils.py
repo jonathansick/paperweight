@@ -10,5 +10,6 @@ import nltk
 
 def wordify(text):
     stopset = set(nltk.corpus.stopwords.words('english'))
-    stemmer = nltk.PorterStemmer()
-    return nltk.WordPunctTokenizer().tokenize(text)
+    tokens = nltk.WordPunctTokenizer().tokenize(text)
+    return [w for w in tokens if not w in stopset]
+
