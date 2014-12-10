@@ -7,7 +7,7 @@ Object Oriented Abstraction of a latex document
 """
 
 import os
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from itertools import chain
 import codecs
 
@@ -59,16 +59,16 @@ class TexDocument(object):
     def sections(self):
         """Find and return the list of section names and positions."""
         sections = []
-        
+
         for match in texutils.section_pattern.finditer(self.text):
             textbefore = self.text[0:match.start()]
             wordsbefore = nlputils.wordify(textbefore)
             numwordsbefore = len(wordsbefore)
-            sections.append((numwordsbefore,match.group(1)))
+            sections.append((numwordsbefore, match.group(1)))
 
         self._sections = sections
         return sections
-    
+
     @property
     def bib_name(self):
         """Find and return the name of the bibtex bibliography file."""
@@ -118,14 +118,14 @@ class TexDocument(object):
         return bib_keys
 
     @property
-    def rich_bib_keys(self):
+    def rich_bib_keys(self, n_words=20):
         """List of all bib keys in the document (and inputted documents),
-           with lots of metadata about the citation within the document."""
+        with lots of metadata about the citation within the document."""
 
         # how many words before and after the citation do we want to extract?
-        howmanywords = 20
+        n_words = 20
 
-        bib_keys = []
+        bib_keys = defaultdict(list)
         # Get bib keys in this document
         for match in texutils.cite_pattern.finditer(self.text):
 
@@ -135,7 +135,7 @@ class TexDocument(object):
             wordsbefore = nlputils.wordify(textbefore)
             wordsafter = nlputils.wordify(textafter)
             numwordsbefore = len(wordsbefore)
-            numwordsafter = len(wordsafter)
+            # numwordsafter = len(wordsafter)
 
             containing_section = None
             for (section_pos, section_name) in self._sections:
@@ -143,20 +143,23 @@ class TexDocument(object):
                     containing_section = (section_pos, section_name)
 
             citebody = match.groups()
-            keys = (citebody[-1].replace(" ","")).split(',')
-            bib_keys += [{"key":key,
-                          "position":numwordsbefore,
-                          "wordsbefore":(" ".join(wordsbefore[-howmanywords:])),
-                          "wordsafter":(" ".join(wordsafter[:howmanywords])),
-                          "section":containing_section} for key in keys]
+            keys = (citebody[-1].replace(" ", "")).split(',')
+            for key in keys:
+                cite_instance = {
+                    "position": numwordsbefore,
+                    "wordsbefore": (" ".join(wordsbefore[-n_words:])),
+                    "wordsafter": (" ".join(wordsafter[:n_words])),
+                    "section": containing_section}
+                bib_keys[key] += [cite_instance]
 
         # Recursion
         for path, document in self._children.iteritems():
-            bib_keys += document.bib_keys
-        #bib_keys = list(set(bib_keys))
+            sub_bib_keys = document.rich_bib_keys(n_words=n_words)
+            for k, cite_instances in sub_bib_keys.iteritems():
+                bib_keys[k] += cite_instances
 
         return bib_keys
-    
+
     def write(self, path):
         """Write the document's text to a ``path`` on the filesystem."""
         with codecs.open(path, 'w', encoding='utf-8') as f:
@@ -235,6 +238,8 @@ class FilesystemTexDocument(TexDocument):
         inlining is accomplished recursively.
         """
         self.text = texutils.inline(self.text)
+        # Remove children
+        self._children = {}
 
 
 class GitTexDocument(TexDocument):
