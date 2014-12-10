@@ -12,7 +12,7 @@ from itertools import chain
 import codecs
 
 from .gitio import read_git_blob
-from . import texutils
+from . import texutils, nlputils
 
 
 class TexDocument(object):
@@ -31,6 +31,7 @@ class TexDocument(object):
     def __init__(self, text):
         super(TexDocument, self).__init__()
         self.text = text
+        self.sections
         self._children = OrderedDict()
 
     def find_input_documents(self):
@@ -54,6 +55,20 @@ class TexDocument(object):
             paths.append(full_fname)
         return paths
 
+    @property
+    def sections(self):
+        """Find and return the list of section names and positions."""
+        sections = []
+        
+        for match in texutils.section_pattern.finditer(self.text):
+            textbefore = self.text[0:match.start()]
+            wordsbefore = nlputils.wordify(textbefore)
+            numwordsbefore = len(wordsbefore)
+            sections.append((numwordsbefore,match.group(1)))
+
+        self._sections = sections
+        return sections
+    
     @property
     def bib_name(self):
         """Find and return the name of the bibtex bibliography file."""
@@ -88,17 +103,60 @@ class TexDocument(object):
     @property
     def bib_keys(self):
         """List of all bib keys in the document (and inputted documents)."""
+
         bib_keys = []
         # Get bib keys in this document
         for match in texutils.cite_pattern.finditer(self.text):
             keys = match.group(1).split(',')
             bib_keys += keys
+
         # Recursion
         for path, document in self._children.iteritems():
             bib_keys += document.bib_keys
         bib_keys = list(set(bib_keys))
+
         return bib_keys
 
+    @property
+    def rich_bib_keys(self):
+        """List of all bib keys in the document (and inputted documents),
+           with lots of metadata about the citation within the document."""
+
+        # how many words before and after the citation do we want to extract?
+        howmanywords = 20
+
+        bib_keys = []
+        # Get bib keys in this document
+        for match in texutils.cite_pattern.finditer(self.text):
+
+            textbefore = self.text[0:match.start()]
+            textafter = self.text[match.end():-1]
+
+            wordsbefore = nlputils.wordify(textbefore)
+            wordsafter = nlputils.wordify(textafter)
+            numwordsbefore = len(wordsbefore)
+            numwordsafter = len(wordsafter)
+
+            containing_section = None
+            for (section_pos, section_name) in self._sections:
+                if section_pos < numwordsbefore:
+                    containing_section = (section_pos, section_name)
+
+            citebody = match.groups()
+            keys = (citebody[-1].replace(" ","")).split(',')
+            bib_keys += [{"key":key,
+                          "position":numwordsbefore,
+                          "wordsbefore":(" ".join(wordsbefore[-howmanywords:])),
+                          "wordsafter":(" ".join(wordsafter[:howmanywords])),
+                          "section":containing_section} for key in keys]
+
+        # Recursion
+        for path, document in self._children.iteritems():
+            bib_keys += document.bib_keys
+        #bib_keys = list(set(bib_keys))
+
+        return bib_keys
+    
     def write(self, path):
         """Write the document's text to a ``path`` on the filesystem."""
         with codecs.open(path, 'w', encoding='utf-8') as f:

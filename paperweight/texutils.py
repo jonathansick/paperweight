@@ -26,6 +26,7 @@ from .gitio import read_git_blob
 
 # ? is non-greedy
 cite_pattern = re.compile(ur'\\cite((.*?)((\[.*?\])*)){(.*?)}', re.UNICODE)
+section_pattern = re.compile(ur'\\section{(.*?)}', re.UNICODE)
 bib_pattern = re.compile(ur'\\bibliography{(.*?)}', re.UNICODE)
 input_pattern = re.compile(ur'\\input{(.*?)}', re.UNICODE)
 input_ifexists_pattern = re.compile(
