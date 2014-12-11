@@ -208,7 +208,7 @@ class FilesystemTexDocument(TexDocument):
     """
     def __init__(self, path, recursive=True):
         # read the tex document
-        self._filepath = path
+        self._filepath = os.path.abspath(path)
         with codecs.open(path, 'r', encoding='utf-8') as f:
             text = f.read()
         super(FilesystemTexDocument, self).__init__(text)
@@ -227,17 +227,19 @@ class FilesystemTexDocument(TexDocument):
         environment. The document is modified in place.
         """
         bbl_path = os.path.splitext(self._filepath)[0] + ".bbl"
-        if not os.path.exists(bbl_path):
-            return
-        with codecs.open(bbl_path, 'r', encoding='utf-8') as f:
-            bbl_text = f.read()
+        try:
+            with codecs.open(bbl_path, 'r', encoding='utf-8') as f:
+                bbl_text = f.read()
+        except IOError:
+            print("Cannot open bibliography {0}".format(bbl_path))
         self.text = texutils.inline_bbl(self.text, bbl_text)
 
     def inline_inputs(self):
         """Inline all input latex files references by this document. The
         inlining is accomplished recursively.
         """
-        self.text = texutils.inline(self.text)
+        self.text = texutils.inline(self.text,
+                                    os.path.dirname(self._filepath))
         # Remove children
         self._children = {}
 

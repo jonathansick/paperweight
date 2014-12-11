@@ -55,44 +55,9 @@ def inline_bbl(root_tex, bbl_tex):
     return result
 
 
-def _sub_line(match):
-    """Function to be used with re.sub to inline files for each match."""
-    fname = match.group(1)
-    if not fname.endswith('.tex'):
-        full_fname = ".".join((fname, 'tex'))
-    else:
-        full_fname = fname
-    with codecs.open(full_fname, 'r', encoding='utf-8') as f:
-        included_text = f.read()
-    # Recursively inline files
-    included_text = inline(included_text)
-    return included_text
-
-
-def _sub_line_ifexists(match):
-    """Function to be used with re.sub for the input_ifexists_pattern."""
-    fname = match.group(1)
-    if os.path.exists(fname):
-        if not fname.endswith('.tex'):
-            full_fname = ".".join((fname, 'tex'))
-        else:
-            full_fname = fname
-        with codecs.open(full_fname, 'r', encoding='utf-8') as f:
-            included_text = f.read()
-        # Append extra info after input
-        included_text = "\n".join((included_text, match.group(2)))
-    else:
-        # Use the fall-back clause in InputIfExists
-        included_text = match.group(3)
-
-    # Recursively inline files
-    included_text = inline(included_text)
-    return included_text
-
-
-def inline(root_text,
-           replacer=_sub_line,
-           ifexists_replacer=_sub_line_ifexists):
+def inline(root_text, base_dir,
+           replacer=None,
+           ifexists_replacer=None):
     """Inline all input latex files. The inlining is accomplished
     recursively.
 
@@ -102,6 +67,8 @@ def inline(root_text,
     ----------
     root_txt : unicode
         Text to process (and include in-lined files).
+    base_dir : str
+        Base directory of file containing ``root_text``.
     replacer : function
         Function called by :func:`re.sub` to replace ``\input`` expressions
         with a latex document. Changeable only for testing purposes.
@@ -115,8 +82,51 @@ def inline(root_text,
     txt : unicode
         Text with referenced files included.
     """
-    result = input_pattern.sub(replacer, root_text)
-    result = input_ifexists_pattern.sub(ifexists_replacer, result)
+    def _sub_line(match):
+        """Function to be used with re.sub to inline files for each match."""
+        fname = match.group(1)
+        if not fname.endswith('.tex'):
+            full_fname = ".".join((fname, 'tex'))
+        else:
+            full_fname = fname
+        full_path = os.path.abspath(os.path.join(base_dir, full_fname))
+        try:
+            with codecs.open(full_path, 'r', encoding='utf-8') as f:
+                included_text = f.read()
+        except IOError:
+            # TODO actually do logging here
+            print("Cannot open {0} for in-lining".format(full_path))
+            return u""
+        else:
+            # Recursively inline files
+            new_base_dir = os.path.dirname(full_path)
+            included_text = inline(included_text, new_base_dir)
+            return included_text
+
+    def _sub_line_ifexists(match):
+        """Function to be used with re.sub for the input_ifexists_pattern."""
+        fname = match.group(1)
+        if not fname.endswith('.tex'):
+            full_fname = ".".join((fname, 'tex'))
+        else:
+            full_fname = fname
+        full_path = os.path.abspath(os.path.join(base_dir, full_fname))
+        new_base_dir = os.path.dirname(full_path)
+
+        if os.path.exists(full_path):
+            with codecs.open(full_path, 'r', encoding='utf-8') as f:
+                included_text = f.read()
+            # Append extra info after input
+            included_text = "\n".join((included_text, match.group(2)))
+        else:
+            # Use the fall-back clause in InputIfExists
+            included_text = match.group(3)
+        # Recursively inline files
+        included_text = inline(included_text, new_base_dir)
+        return included_text
+
+    result = input_pattern.sub(_sub_line, root_text)
+    result = input_ifexists_pattern.sub(_sub_line_ifexists, result)
     return result
 
 
