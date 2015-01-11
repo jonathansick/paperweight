@@ -55,7 +55,8 @@ def inline_bbl(root_tex, bbl_tex):
     return result
 
 
-def inline(root_text, base_dir,
+def inline(root_text,
+           base_dir="",
            replacer=None,
            ifexists_replacer=None):
     """Inline all input latex files. The inlining is accomplished
@@ -68,7 +69,8 @@ def inline(root_text, base_dir,
     root_txt : unicode
         Text to process (and include in-lined files).
     base_dir : str
-        Base directory of file containing ``root_text``.
+        Base directory of file containing ``root_text``. Defaults to the
+        current working directory.
     replacer : function
         Function called by :func:`re.sub` to replace ``\input`` expressions
         with a latex document. Changeable only for testing purposes.
