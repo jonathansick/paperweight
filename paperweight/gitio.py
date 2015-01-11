@@ -62,3 +62,27 @@ def _read_blob(tree, filename):
             # txt = txt.encode('utf-8')
             return txt
     return None
+
+
+def absolute_git_root_dir(fpath=""):
+    """Absolute path to the git root directory containing a given file or
+    directory.
+    """
+    if len(fpath) == 0:
+        dirname_str = os.getcwd()
+    else:
+        dirname_str = os.path.dirname(fpath)
+    dirname_str = os.path.abspath(dirname_str)
+    dirnames = dirname_str.split(os.sep)
+    print dirnames
+    n = len(dirnames)
+    for i in xrange(n):
+        # is there a .git directory at this level?
+        print dirnames[0:n - i]
+        # FIXME hack
+        basedir = "/" + os.path.join(*dirnames[0:n - i])
+        print basedir
+        gitdir = os.path.join(basedir, ".git")
+        print gitdir
+        if os.path.exists(gitdir):
+            return basedir
