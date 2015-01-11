@@ -132,7 +132,7 @@ def inline(root_text,
     return result
 
 
-def inline_blob(commit_ref, root_text):
+def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
     """Inline all input latex files that exist as git blobs in a tree object.
 
     The inlining is accomplished recursively.
@@ -143,12 +143,16 @@ def inline_blob(commit_ref, root_text):
     ----------
     commit_ref : str
         String identifying a git commit/tag.
-    path : str
-        Path of file to process in the tree
+    root_text : unicode
+        Text of tex document where referenced files will be inlined.
+    root_path : str
+        Path of file containing root_text relative to the git directory.
+    repo_dir : str
+        Directory of the containing git repository.
 
     Returns
     -------
-    txt : str
+    txt : unicode
         Text with referenced files included.
     """
     def _sub_blob(match):
@@ -158,14 +162,22 @@ def inline_blob(commit_ref, root_text):
             full_fname = ".".join((fname, 'tex'))
         else:
             full_fname = fname
-        included_text = read_git_blob(commit_ref, full_fname)
+        # full_fname is relative to the root_path
+        # Make path relative to git repo root
+        git_rel_path = os.path.relpath(
+            os.path.join(repo_dir, root_path, full_fname),
+            repo_dir)
+        included_text = read_git_blob(commit_ref, git_rel_path,
+                                      root=repo_dir)
         if included_text is None:
             # perhaps file is not in VC
-            # FIXME need to deal possibility is does not exist there either
+            # FIXME need to deal with possibility
+            # it does not exist there either
             with codecs.open(full_fname, 'r', encoding='utf-8') as f:
                 included_text = f.read()
         # Recursively inline files
-        included_text = inline_blob(commit_ref, included_text)
+        included_text = inline_blob(commit_ref, included_text, git_rel_path,
+                                    repo_dir=repo_dir)
         return included_text
 
     def _sub_blob_ifexists(match):
@@ -176,7 +188,14 @@ def inline_blob(commit_ref, root_text):
         else:
             full_fname = fname
 
-        included_text = read_git_blob(commit_ref, full_fname)
+        # full_fname is relative to the root_path
+        # Make path relative to git repo root
+        git_rel_path = os.path.relpath(
+            os.path.join(repo_dir, root_path, full_fname),
+            repo_dir)
+
+        included_text = read_git_blob(commit_ref, git_rel_path,
+                                      repo=repo_dir)
         if included_text is not None:
             # Append extra info after input
             included_text = "\n".join((included_text, match.group(2)))
@@ -186,7 +205,8 @@ def inline_blob(commit_ref, root_text):
             included_text = match.group(3)
 
         # Recursively inline files
-        included_text = inline_blob(commit_ref, included_text)
+        included_text = inline_blob(commit_ref, included_text, git_rel_path,
+                                    repo_dir=repo_dir)
         return included_text
 
     result = input_pattern.sub(_sub_blob, root_text)
