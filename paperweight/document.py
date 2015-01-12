@@ -1,9 +1,23 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-Object Oriented Abstraction of a latex document
+Object oriented access to LaTeX documents.
 
-2014-12-02 - Created by Jonathan Sick
+The :mod:`paperweight.document` module provides object-oriented interfaces
+for manipulating or mining LaTeX documents.
+Much of the functionality of the :mod:`paperweight.texutils`,
+:mod:`paperweight.gitio` and :mod:`paperweight.nlputils` modules can be
+accessed through this interface.
+
+Depending on how the LaTeX document is stored, you should use either of two
+document classes.
+:class:`paperweight.document.FilesystemTexDocument` should be used for regular
+documents in the filesystem.
+If you wish to operate on documents stored within a certain commit of a
+checked-out Git repository, then use
+:class:`paperweight.document.GitTexDocument`.
+The interfaces for both classes are consistent since they inherit from
+:class:`paperweight.document.TexDocument` under the hood.
 """
 
 import os
@@ -57,7 +71,9 @@ class TexDocument(object):
 
     @property
     def sections(self):
-        """Find and return the list of section names and positions."""
+        """List with tuples of section names and positions.
+        Positions of section names are measured by cumulative word count.
+        """
         sections = []
 
         for match in texutils.section_pattern.finditer(self.text):
@@ -71,7 +87,9 @@ class TexDocument(object):
 
     @property
     def bib_name(self):
-        """Find and return the name of the bibtex bibliography file."""
+        """Name of the BibTeX bibliography file (e.g.,
+        ``'mybibliography.bib'``).
+        """
         bib_name = None
         for match in texutils.bib_pattern.finditer(self.text):
             bib_name = match.group(1)
@@ -81,7 +99,7 @@ class TexDocument(object):
 
     @property
     def bib_path(self):
-        """Return the full file path to the .bib bibliography document."""
+        """Absolute file path to the .bib bibliography document."""
         bib_name = self.bib_name
         # FIXME need to bake in search paths for tex documents in all platforms
         osx_path = os.path.expanduser(
@@ -94,7 +112,13 @@ class TexDocument(object):
             return None
 
     def remove_comments(self, recursive=True):
-        """Remove latex comments from document (modifies document in place)."""
+        """Remove latex comments from document (modifies document in place).
+
+        Parameters
+        ----------
+        recursive : bool
+            Remove comments from all input LaTeX documents (default ``True``).
+        """
         self.text = texutils.remove_comments(self.text)
         if recursive:
             for path, document in self._children.iteritems():
@@ -102,8 +126,7 @@ class TexDocument(object):
 
     @property
     def bib_keys(self):
-        """List of all bib keys in the document (and inputted documents)."""
-
+        """List of all bib keys in the document (and input documents)."""
         bib_keys = []
         # Get bib keys in this document
         for match in texutils.cite_pattern.finditer(self.text):
@@ -117,14 +140,37 @@ class TexDocument(object):
 
         return bib_keys
 
-    @property
-    def rich_bib_keys(self, n_words=20):
-        """List of all bib keys in the document (and inputted documents),
-        with lots of metadata about the citation within the document."""
+    def extract_citation_context(self, n_words=20):
+        """Generate a dictionary of all bib keys in the document (and input
+        documents), with rich of metadata about the context of each
+        citation in the document.
 
-        # how many words before and after the citation do we want to extract?
-        n_words = 20
+        For example, suppose ``'Sick:2014'`` is cited twice within a document.
+        Then the dictionary returned by this method will have a length-2
+        list under the ``'Sick:2014'`` key. Each item in this list
+        will be a dictionary providing metadata of the context for that
+        citation. Fields of this dictionary are:
 
+        - ``position``: (int) the cumulative word count at which the
+          citation occurs.
+        - ``wordsbefore``: (unicode) text occuring before the citation.
+        - ``wordsafter``: (unicode) text occuring after the citation.
+        - ``section``: (unicode) name of the section in which the citation
+          occurs.
+
+        Parameters
+        ----------
+        n_words : int
+            Number of words before and after the citation to extract for
+            context.
+
+        Returns
+        -------
+        bib_keys : dict
+            Dictionary, keyed by BibTeX cite key, where entires are lists
+            of instances of citations. See above for the format of the
+            instance metadata.
+        """
         bib_keys = defaultdict(list)
         # Get bib keys in this document
         for match in texutils.cite_pattern.finditer(self.text):
@@ -196,7 +242,7 @@ class TexDocument(object):
 
 
 class FilesystemTexDocument(TexDocument):
-    """A tex document derived from a file in the filesystem.
+    """A TeX document derived from a file in the filesystem.
 
     Parameters
     ----------
@@ -236,7 +282,8 @@ class FilesystemTexDocument(TexDocument):
 
     def inline_inputs(self):
         """Inline all input latex files references by this document. The
-        inlining is accomplished recursively.
+        inlining is accomplished recursively. The document is modified
+        in place.
         """
         self.text = texutils.inline(self.text,
                                     os.path.dirname(self._filepath))
@@ -247,8 +294,7 @@ class FilesystemTexDocument(TexDocument):
 class GitTexDocument(TexDocument):
     """A tex document derived from a file in the git repository.
 
-    .. note:: Should I include the path to the git root? (in case the user's
-              CWD is not that of the git document)
+    .. todo:: This class is not fully implemented.
 
     Parameters
     ----------

@@ -2,6 +2,6 @@ paperweight.document
 ====================
 
 .. automodule:: paperweight.document
-   :members: paperewight.document.FilesystemTexDocument, paperweight.document.GitTexDocument
+   :show-inheritance:
+   :members:
    :inherited-members:
-
