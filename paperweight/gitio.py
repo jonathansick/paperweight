@@ -2,13 +2,13 @@
 # encoding: utf-8
 """
 Utilities for reading content in git repositories.
-
-- :func:`read_git_blob` will read unicode text from a git commit (given a
-  commit reference and a file path.
 """
 
 import git
 import os
+
+
+__all__ = ['read_git_blob', 'absolute_git_root_dir']
 
 
 def read_git_blob(commit_ref, path, repo_dir='.'):

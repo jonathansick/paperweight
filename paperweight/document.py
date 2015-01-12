@@ -29,6 +29,9 @@ from .gitio import read_git_blob
 from . import texutils, nlputils
 
 
+__all__ = ['FilesystemTexDocument', 'GitTexDocument', 'TexDocument']
+
+
 class TexDocument(object):
     """Baseclass for a tex document.
 

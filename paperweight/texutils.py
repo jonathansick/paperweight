@@ -2,16 +2,6 @@
 # encoding: utf-8
 """
 Utilities for maniuplating latex documents.
-
-Inline \input{*} latex files. Useful for packaging and latexdiff.
-
-There are groups of functions: tools for working with latex files on the
-regular filesystem, and functions for working with files embedded as
-blobs in the git tree.
-
-- :func:`inline` and :func:`_sub_inline` for inlining documents in the
-  filesystem.
-- :func:`inline_blob` to inline text from files in the git tree.
 """
 
 import os
@@ -20,6 +10,9 @@ import codecs
 import fnmatch
 import logging
 from .gitio import read_git_blob
+
+__all__ = ['find_root_tex_document', 'iter_tex_documents', 'inline',
+           'inline_blob', 'inline_bbl', 'remove_comments']
 
 
 # ? is non-greedy
@@ -35,7 +28,19 @@ docclass_pattern = re.compile(ur'\\documentclass(.*?){(.*?)}', re.UNICODE)
 
 def find_root_tex_document(base_dir="."):
     """Find the tex article in the current directory that can be considered
-    a root. We do this by searching contents for `\documentclass`.
+    a root. We do this by searching contents for ``'\documentclass'``.
+
+    Parameters
+    ----------
+    base_dir : str
+        Directory to search for LaTeX documents, relative to the current
+        working directory.
+
+    Returns
+    -------
+    tex_path : str
+        Path to the root tex document relative to the current
+        working directory.
     """
     log = logging.getLogger(__name__)
     for tex_path in iter_tex_documents(base_dir=base_dir):
@@ -49,7 +54,7 @@ def find_root_tex_document(base_dir="."):
 
 
 def iter_tex_documents(base_dir="."):
-    """Iterate through all .tex documents in the current directory"""
+    """Iterate through all .tex documents in the current directory."""
     for path, dirlist, filelist in os.walk(base_dir):
         for name in fnmatch.filter(filelist, "*.tex"):
             yield os.path.join(path, name)
@@ -72,7 +77,7 @@ def inline_bbl(root_tex, bbl_tex):
 
     Returns
     -------
-    txt : str
+    txt : unicode
         Text with bibliography included.
     """
     bbl_tex = bbl_tex.replace(u'\\', u'\\\\')
@@ -84,10 +89,10 @@ def inline(root_text,
            base_dir="",
            replacer=None,
            ifexists_replacer=None):
-    """Inline all input latex files. The inlining is accomplished
-    recursively.
+    """Inline all input latex files.
 
-    All files are opened as UTF-8 unicode files.
+    The inlining is accomplished recursively. All files are opened as UTF-8
+    unicode files.
 
     Parameters
     ----------
@@ -160,9 +165,8 @@ def inline(root_text,
 def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
     """Inline all input latex files that exist as git blobs in a tree object.
 
-    The inlining is accomplished recursively.
-
-    All files are opened as UTF-8 unicode files.
+    The inlining is accomplished recursively. All files are opened as UTF-8
+    unicode files.
 
     Parameters
     ----------
