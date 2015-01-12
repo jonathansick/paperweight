@@ -22,6 +22,7 @@ var/
 .installed.cfg
 *.egg
 doc/_build
+doc/demo/.ipynb_checkpoints/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

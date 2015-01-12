@@ -36,6 +36,7 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
+   demo/index
    api/index
 
 
