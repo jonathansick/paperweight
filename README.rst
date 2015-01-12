@@ -43,7 +43,7 @@ Contributors
 
 Paperweight was created as a hack for .Astronomy 6 (2014) in Chicago.
 
-* * *
+****
 
 Copyright 2015 Jonathan Sick, @jonathansick
 
