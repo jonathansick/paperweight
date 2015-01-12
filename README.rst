@@ -1,10 +1,13 @@
-paperweight
-===========
+.. image:: https://img.shields.io/pypi/v/nine.svg?style=flat
+   :target: https://pypi.python.org/pypi/paperweight
 
 .. image:: https://readthedocs.org/projects/paperweight/badge/?version=latest
    :target: https://readthedocs.org/projects/paperweight/?badge=latest
    :alt: Documentation Status
 
+
+paperweight
+===========
 
 Paperweight is a Python package for hacking LaTeX documents.
 
