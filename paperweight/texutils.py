@@ -21,6 +21,8 @@ blobs in the git tree.
 import os
 import re
 import codecs
+import fnmatch
+import logging
 from .gitio import read_git_blob
 
 
@@ -32,6 +34,33 @@ input_pattern = re.compile(ur'\\input{(.*?)}', re.UNICODE)
 input_ifexists_pattern = re.compile(
     ur'\\InputIfFileExists{(.*)}{(.*)}{(.*)}',
     re.UNICODE)
+docclass_pattern = re.compile(ur'\\documentclass(.*?){(.*?)}', re.UNICODE)
+
+
+def find_root_tex_document(base_dir="."):
+    """Find the tex article in the current directory that can be considered
+    a root. We do this by searching contents for `\documentclass`.
+    """
+    log = logging.getLogger(__name__)
+    for tex_path in iter_tex_documents(base_dir=base_dir):
+        with codecs.open(tex_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+            if len(docclass_pattern.findall(text)) > 0:
+                log.debug("Found root tex {0}".format(tex_path))
+                return tex_path
+    log.warning("Could not find a root .tex file")
+    raise RootNotFound
+
+
+def iter_tex_documents(base_dir="."):
+    """Iterate through all .tex documents in the current directory"""
+    for path, dirlist, filelist in os.walk(base_dir):
+        for name in fnmatch.filter(filelist, "*.tex"):
+            yield os.path.join(path, name)
+
+
+class RootNotFound(BaseException):
+    pass
 
 
 def inline_bbl(root_tex, bbl_tex):
