@@ -9,6 +9,26 @@ See the API documentation below for further information.
 
 Paperweight is `developed on GitHub <http://github.com/jonathansick/paperweight>`_ under an open BSD license.
 
+Installation
+------------
+
+You can install the latest Paperweight and its dependencies from PyPI::
+
+   pip install paperweight
+
+
+You can also install the bleeding-edge from git::
+
+   pip install git+git://github.com/jonathansick/paperweight.git
+
+
+Alternatively you can develop directly on the git source repository::
+
+   git clone https://github.com/jonathansick/paperweight.git
+   cd paperweight
+   python setup.py develop
+   python setup.py build_sphinx
+
 
 Documentation
 -------------
@@ -20,7 +40,7 @@ Documentation
 
 
 Indices
-~~~~~~~
+-------
 
 * :ref:`genindex`
 * :ref:`modindex`
