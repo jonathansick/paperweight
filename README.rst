@@ -1,4 +1,4 @@
-.. image:: https://img.shields.io/pypi/v/nine.svg?style=flat
+.. image:: https://img.shields.io/pypi/v/paperweight.svg?style=flat
    :target: https://pypi.python.org/pypi/paperweight
 
 .. image:: https://readthedocs.org/projects/paperweight/badge/?version=latest
