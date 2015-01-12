@@ -258,15 +258,15 @@ class GitTexDocument(TexDocument):
     git_hash : str
         Any SHA or git tag that can resolve into a commit in the
         git repository.
-    root : str
+    repo_dir : str
         Path from current working directory to the root of the git repository.
     """
-    def __init__(self, git_path, git_hash, root='.', recursive=True):
+    def __init__(self, git_path, git_hash, repo_dir='.', recursive=True):
         # read teh tex document
         self._git_path = git_path
-        self._git_root = root
+        self._git_root = repo_dir
         self._git_hash = git_hash
-        text = read_git_blob(git_hash, git_path, root=root)
+        text = read_git_blob(git_hash, git_path, repo_dir=repo_dir)
         super(GitTexDocument, self).__init__(text)
         if recursive:
             child_paths = self.find_input_documents()

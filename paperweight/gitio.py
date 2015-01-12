@@ -11,7 +11,7 @@ import git
 import os
 
 
-def read_git_blob(commit_ref, path, root='.'):
+def read_git_blob(commit_ref, path, repo_dir='.'):
     """Get text from a git blob.
 
     Parameters
@@ -22,7 +22,7 @@ def read_git_blob(commit_ref, path, root='.'):
     path : str
         Path to the document in the git repository, relative to the root
         of the repository.
-    root : str
+    repo_dir : str
         Path from current working directory to the root of the git repository.
 
     Returns
@@ -30,7 +30,7 @@ def read_git_blob(commit_ref, path, root='.'):
     text : unicode
         The document text.
     """
-    repo = git.Repo(root)
+    repo = git.Repo(repo_dir)
     tree = repo.tree(commit_ref)
     dirname, fname = os.path.split(path)
     text = None
@@ -74,15 +74,11 @@ def absolute_git_root_dir(fpath=""):
         dirname_str = os.path.dirname(fpath)
     dirname_str = os.path.abspath(dirname_str)
     dirnames = dirname_str.split(os.sep)
-    print dirnames
     n = len(dirnames)
     for i in xrange(n):
         # is there a .git directory at this level?
-        print dirnames[0:n - i]
         # FIXME hack
         basedir = "/" + os.path.join(*dirnames[0:n - i])
-        print basedir
         gitdir = os.path.join(basedir, ".git")
-        print gitdir
         if os.path.exists(gitdir):
             return basedir

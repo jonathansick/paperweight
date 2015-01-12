@@ -168,7 +168,7 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
             os.path.join(repo_dir, root_path, full_fname),
             repo_dir)
         included_text = read_git_blob(commit_ref, git_rel_path,
-                                      root=repo_dir)
+                                      repo_dir=repo_dir)
         if included_text is None:
             # perhaps file is not in VC
             # FIXME need to deal with possibility
@@ -195,7 +195,7 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
             repo_dir)
 
         included_text = read_git_blob(commit_ref, git_rel_path,
-                                      repo=repo_dir)
+                                      repo_dir=repo_dir)
         if included_text is not None:
             # Append extra info after input
             included_text = "\n".join((included_text, match.group(2)))
