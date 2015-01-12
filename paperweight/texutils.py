@@ -3,10 +3,6 @@
 """
 Utilities for maniuplating latex documents.
 
-
-Inlining latex documents
-------------------------
-
 Inline \input{*} latex files. Useful for packaging and latexdiff.
 
 There are groups of functions: tools for working with latex files on the
