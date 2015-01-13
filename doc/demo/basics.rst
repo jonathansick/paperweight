@@ -3,8 +3,11 @@ Paperweight Basics
 ==================
 
 This guide provides a brief demo of what you can do with Paperweight.
-Here's we'll use a LaTeX document that I have handy, but you may want to
-try the same commands with your own papers.
+Here we'll use a LaTeX document that I have handy, but you may want to
+try the same commands on your own papers. There are some issues
+typesetting ipython notebooks on Read The Docs, so you may prefer to
+`view this notebook with the ipython notebook
+viewer <http://nbviewer.ipython.org/github/jonathansick/paperweight/blob/master/doc/demo/basics.ipynb>`__.
 
 First, let's set our current working directory to match the paper for
 convenience.
@@ -43,9 +46,9 @@ Working with LaTeX Documents
 ----------------------------
 
 Now that we know where our LaTeX document is, we can open it as a
-``FilesystemTexDocument``. Note we also provide a ``GitTexDocument`` to
-work with documents stored in an arbitrary commit within a git repo.
-We'll get to that in a separate demo.
+``FilesystemTexDocument``. Note we also provide a ``GitTexDocument``
+class to work with documents stored in an arbitrary commit within a git
+repo. We'll get to that in a separate demo.
 
 .. code:: python
 
@@ -114,7 +117,7 @@ Now you'll see that we no longer reference other tex files or a bibtex
 file since all text content is embedded into the root TeX document. This
 can be handy for submitting the article to a journal (in fact the
 `preprint <http://github.com/jonathansick/preprint>`__ tool uses
-paperweight to do just that).
+Paperweight to do just that).
 
 .. code:: python
 
