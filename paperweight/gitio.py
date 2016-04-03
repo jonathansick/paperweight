@@ -50,13 +50,12 @@ def _read_blob_in_tree(tree, components):
     else:
         # Still trees to open
         dirname = components.pop(0)
-        for t in tree.trees:
+        for t in tree.traverse():
             if t.name == dirname:
                 return _read_blob_in_tree(t, components)
 
 
 def _read_blob(tree, filename):
-    print "_read_blob ", filename
     for blb in tree.blobs:
         if blb.name == filename:
             txt = unicode(blb.data_stream.read(), 'utf-8')

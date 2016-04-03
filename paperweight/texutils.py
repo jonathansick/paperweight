@@ -164,7 +164,7 @@ def inline(root_text,
     return result
 
 
-def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
+def inline_blob(commit_ref, root_text, base_dir='.', repo_dir=""):
     """Inline all input latex files that exist as git blobs in a tree object.
 
     The inlining is accomplished recursively. All files are opened as UTF-8
@@ -176,8 +176,8 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
         String identifying a git commit/tag.
     root_text : unicode
         Text of tex document where referenced files will be inlined.
-    root_path : str
-        Path of file containing root_text relative to the git directory.
+    base_dir : str
+        Directory of the master tex document, relative to the repo_dir.
     repo_dir : str
         Directory of the containing git repository.
 
@@ -193,11 +193,7 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
             full_fname = ".".join((fname, 'tex'))
         else:
             full_fname = fname
-        # full_fname is relative to the root_path
-        # Make path relative to git repo root
-        git_rel_path = os.path.relpath(
-            os.path.join(repo_dir, root_path, full_fname),
-            repo_dir)
+        git_rel_path = os.path.relpath(full_fname, base_dir)
         included_text = read_git_blob(commit_ref, git_rel_path,
                                       repo_dir=repo_dir)
         if included_text is None:
@@ -207,7 +203,8 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
             with codecs.open(full_fname, 'r', encoding='utf-8') as f:
                 included_text = f.read()
         # Recursively inline files
-        included_text = inline_blob(commit_ref, included_text, git_rel_path,
+        included_text = inline_blob(commit_ref, included_text,
+                                    base_dir=base_dir,
                                     repo_dir=repo_dir)
         return included_text
 
@@ -218,12 +215,11 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
             full_fname = ".".join((fname, 'tex'))
         else:
             full_fname = fname
-        print "blob sub in {0}".format(full_fname)
 
         # full_fname is relative to the root_path
         # Make path relative to git repo root
         git_rel_path = os.path.relpath(
-            os.path.join(repo_dir, root_path, full_fname),
+            os.path.join(repo_dir, base_dir, full_fname),
             repo_dir)
 
         included_text = read_git_blob(commit_ref, git_rel_path,
@@ -237,7 +233,8 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
             included_text = match.group(3)
 
         # Recursively inline files
-        included_text = inline_blob(commit_ref, included_text, git_rel_path,
+        included_text = inline_blob(commit_ref, included_text,
+                                    base_dir=base_dir,
                                     repo_dir=repo_dir)
         return included_text
 
