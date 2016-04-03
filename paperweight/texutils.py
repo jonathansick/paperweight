@@ -156,7 +156,9 @@ def inline(root_text,
         included_text = inline(included_text, base_dir=base_dir)
         return included_text
 
-    result = input_pattern.sub(_sub_line, root_text)
+    # Text processing pipline
+    result = remove_comments(root_text)
+    result = input_pattern.sub(_sub_line, result)
     result = include_pattern.sub(_sub_line, result)
     result = input_ifexists_pattern.sub(_sub_line_ifexists, result)
     return result
@@ -236,7 +238,9 @@ def inline_blob(commit_ref, root_text, base_dir='.', repo_dir=""):
                                     repo_dir=repo_dir)
         return included_text
 
-    result = input_pattern.sub(_sub_blob, root_text)
+    # Text processing pipline
+    result = remove_comments(root_text)
+    result = input_pattern.sub(_sub_blob, result)
     result = include_pattern.sub(_sub_blob, result)
     result = input_ifexists_pattern.sub(_sub_blob_ifexists, result)
     return result
