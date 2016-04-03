@@ -20,6 +20,7 @@ cite_pattern = re.compile(ur'\\cite((.*?)((\[.*?\])*)){(.*?)}', re.UNICODE)
 section_pattern = re.compile(ur'\\section{(.*?)}', re.UNICODE)
 bib_pattern = re.compile(ur'\\bibliography{(.*?)}', re.UNICODE)
 input_pattern = re.compile(ur'\\input{(.*?)}', re.UNICODE)
+include_pattern = re.compile(ur'\\include{(.*?)}', re.UNICODE)
 input_ifexists_pattern = re.compile(
     ur'\\InputIfFileExists{(.*)}{(.*)}{(.*)}',
     re.UNICODE)
@@ -158,6 +159,7 @@ def inline(root_text,
         return included_text
 
     result = input_pattern.sub(_sub_line, root_text)
+    result = include_pattern.sub(_sub_line, result)
     result = input_ifexists_pattern.sub(_sub_line_ifexists, result)
     return result
 
@@ -216,6 +218,7 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
             full_fname = ".".join((fname, 'tex'))
         else:
             full_fname = fname
+        print "blob sub in {0}".format(full_fname)
 
         # full_fname is relative to the root_path
         # Make path relative to git repo root
@@ -239,6 +242,7 @@ def inline_blob(commit_ref, root_text, root_path, repo_dir=""):
         return included_text
 
     result = input_pattern.sub(_sub_blob, root_text)
+    result = include_pattern.sub(_sub_blob, result)
     result = input_ifexists_pattern.sub(_sub_blob_ifexists, result)
     return result
 

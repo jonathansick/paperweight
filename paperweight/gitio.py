@@ -56,6 +56,7 @@ def _read_blob_in_tree(tree, components):
 
 
 def _read_blob(tree, filename):
+    print "_read_blob ", filename
     for blb in tree.blobs:
         if blb.name == filename:
             txt = unicode(blb.data_stream.read(), 'utf-8')
