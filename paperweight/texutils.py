@@ -132,8 +132,7 @@ def inline(root_text,
             return u""
         else:
             # Recursively inline files
-            new_base_dir = os.path.dirname(full_path)
-            included_text = inline(included_text, new_base_dir)
+            included_text = inline(included_text, base_dir=base_dir)
             return included_text
 
     def _sub_line_ifexists(match):
@@ -144,7 +143,6 @@ def inline(root_text,
         else:
             full_fname = fname
         full_path = os.path.abspath(os.path.join(base_dir, full_fname))
-        new_base_dir = os.path.dirname(full_path)
 
         if os.path.exists(full_path):
             with codecs.open(full_path, 'r', encoding='utf-8') as f:
@@ -155,7 +153,7 @@ def inline(root_text,
             # Use the fall-back clause in InputIfExists
             included_text = match.group(3)
         # Recursively inline files
-        included_text = inline(included_text, new_base_dir)
+        included_text = inline(included_text, base_dir=base_dir)
         return included_text
 
     result = input_pattern.sub(_sub_line, root_text)
