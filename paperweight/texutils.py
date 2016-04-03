@@ -260,4 +260,4 @@ def remove_comments(tex):
         The manuscript without comments.
     """
     # Expression via http://stackoverflow.com/a/13365453
-    return re.sub(ur'(?<!\\)%.*', ur'', tex)
+    return re.sub(ur'(?<!\\)%.*\n', ur'', tex)
